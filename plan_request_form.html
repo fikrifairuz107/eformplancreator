@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiuu Eform Plan Request Form</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+:root{--blue:#1A73E8;--blue-dk:#1557B0;--bg:#F5F7FA;--card:#FFFFFF;--border:#E0E4EA;--text:#1C2331;--muted:#6B7280}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--blue);padding:14px 32px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(26,115,232,.3)}
+.topbar-icon{font-size:22px}.topbar-title{color:#fff;font-size:16px;font-weight:600}.topbar-sub{color:rgba(255,255,255,.65);font-size:13px;margin-left:auto}
+.page{max-width:900px;margin:0 auto;padding:32px 24px 80px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.card-header{padding:14px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);background:#FAFBFC}
+.card-header-icon{font-size:18px}.card-header-title{font-size:14px;font-weight:600}
+.card-body{padding:20px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:0}
+.field label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.field input{padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:#fff;transition:border-color .15s;outline:none;max-width:360px}
+.field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.12)}
+.field .hint{font-size:11px;color:var(--muted);margin-top:4px}
+.plan-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+@media(max-width:700px){.plan-grid{grid-template-columns:repeat(3,1fr)}}
+.plan-tile{border:2px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;transition:all .15s;user-select:none;background:#fff}
+.plan-tile:hover{border-color:var(--blue);background:#f0f6ff}
+.plan-tile.active{border-color:var(--blue);background:#EBF2FF}
+.plan-tile input[type=checkbox]{display:none}
+.plan-tile-icon{font-size:20px;margin-bottom:5px}
+.plan-tile-name{font-size:11px;font-weight:600;color:var(--text);line-height:1.3}
+.plan-tile-tag{font-size:10px;color:var(--muted);margin-top:2px}
+.plan-tile-check{width:16px;height:16px;border-radius:4px;border:2px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff;float:right;transition:all .15s}
+.plan-tile.active .plan-tile-check{background:var(--blue);border-color:var(--blue)}
+.plan-section{display:none;margin-bottom:16px}
+.plan-section.visible{display:block}
+.plan-section-header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px 10px 0 0;background:#F0F6FF;border:1px solid #C8DCFF;border-bottom:none}
+.plan-section-header-title{font-size:13px;font-weight:600;color:var(--blue-dk)}
+.channels-table{border:1px solid #C8DCFF;border-radius:0 0 10px 10px;overflow:hidden}
+.ch-row{display:grid;grid-template-columns:26px 1fr 100px 120px;align-items:center;padding:7px 12px;border-bottom:1px solid #EEF2F8;gap:4px;transition:background .1s}
+.ch-row:last-child{border-bottom:none}
+.ch-row:hover{background:#F8FAFF}
+.ch-row.sub{background:#FAFBFF}
+.ch-row.sub .ch-name{padding-left:14px;color:var(--muted);font-size:12px}
+.ch-flag{font-size:13px}
+.ch-name{font-size:13px;padding:0 4px;line-height:1.3}
+.ctag{font-size:10px;font-family:'DM Mono',monospace;padding:1px 5px;border-radius:4px;margin-left:5px;font-weight:500}
+.tag-my{background:#CCFBF1;color:#0D6E62}.tag-sg{background:#FEE2E2;color:#991B1B}
+.tag-cn{background:#FEF3C7;color:#92400E}.tag-us{background:#EDE9FE;color:#3730A3}
+.ch-rate input,.ch-cost input{width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);text-align:right;outline:none;transition:border-color .15s}
+.ch-rate input:focus,.ch-cost input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(26,115,232,.1)}
+.ch-rate input::placeholder,.ch-cost input::placeholder{color:#C5C9D0;font-size:11px}
+.ch-header{display:grid;grid-template-columns:26px 1fr 100px 120px;gap:4px;padding:7px 12px;background:#E8F0FE;border-bottom:1px solid #C8DCFF;font-size:11px;font-weight:600;color:var(--blue-dk);text-transform:uppercase;letter-spacing:.4px}
+.ch-header div:nth-child(3),.ch-header div:nth-child(4){text-align:right}
+.btn-gen{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s;margin-top:8px;box-shadow:0 3px 12px rgba(26,115,232,.35)}
+.btn-gen:hover{background:var(--blue-dk);transform:translateY(-1px);box-shadow:0 5px 16px rgba(26,115,232,.4)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1C2331;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:500;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.info-box{background:#EBF2FF;border:1px solid #C8DCFF;border-radius:8px;padding:12px 14px;font-size:12.5px;color:var(--blue-dk);margin-bottom:20px;display:flex;gap:10px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="topbar-icon">📋</span>
+  <span class="topbar-title">Fiuu Eform Plan Request Form</span>
+  <span class="topbar-sub">By Onboarding Team</span>
+</div>
+<div class="page">
+
+  <div class="card">
+    <div class="card-header"><span class="card-header-icon">🏢</span><span class="card-header-title">Merchant Info</span></div>
+    <div class="card-body">
+      <div class="field">
+        <label>Merchant ID / MRP ID</label>
+        <input type="text" id="merchantId" placeholder="e.g. MRParmiena" />
+        <span class="hint">Used as Sales PIC and appended to all plan names — e.g. EWALLET ONLINE (MRParmiena)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-header-icon">💬</span><span class="card-header-title">Remarks</span></div>
+    <div class="card-body">
+      <div class="field">
+        <label>Additional Notes / Remarks</label>
+        <textarea id="remarks" rows="3" placeholder="e.g. Special request, promo rate, additional info..." style="padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:#fff;resize:vertical;outline:none;width:100%;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-header-icon">📦</span><span class="card-header-title">Select Plans To Create</span></div>
+    <div class="card-body">
+      <div class="info-box"><span>💡</span>Tick plans needed. Fill Rate (%) and Cost (RM) per channel — leave both blank to exclude. Formula: Default = Min+1%, Max = Min+3%.</div>
+      <div class="plan-grid">
+        <label class="plan-tile" id="tile-ewallet-online"><input type="checkbox" value="ewallet-online" onchange="togglePlan(this)"><div class="plan-tile-check">✓</div><div class="plan-tile-icon">📱</div><div class="plan-tile-name">eWallet Online</div><div class="plan-tile-tag">MY · SG · CN</div></label>
+        <label class="plan-tile" id="tile-ewallet-offline"><input type="checkbox" value="ewallet-offline" onchange="togglePlan(this)"><div class="plan-tile-check">✓</div><div class="plan-tile-icon">📲</div><div class="plan-tile-name">eWallet Offline</div><div class="plan-tile-tag">MY · SG · CN</div></label>
+        <label class="plan-tile" id="tile-cc-online"><input type="checkbox" value="cc-online" onchange="togglePlan(this)"><div class="plan-tile-check">✓</div><div class="plan-tile-icon">💳</div><div class="plan-tile-name">CC Online</div><div class="plan-tile-tag">CN · US</div></label>
+        <label class="plan-tile" id="tile-cc-offline"><input type="checkbox" value="cc-offline" onchange="togglePlan(this)"><div class="plan-tile-check">✓</div><div class="plan-tile-icon">🏧</div><div class="plan-tile-name">CC Offline</div><div class="plan-tile-tag">MY · CN · US</div></label>
+        <label class="plan-tile" id="tile-ib"><input type="checkbox" value="ib" onchange="togglePlan(this)"><div class="plan-tile-check">✓</div><div class="plan-tile-icon">🏦</div><div class="plan-tile-name">Online Banking</div><div class="plan-tile-tag">MY</div></label>
+        <label class="plan-tile" id="tile-cn-ib"><input type="checkbox" value="cn-ib" onchange="togglePlan(this)"><div class="plan-tile-check">✓</div><div class="plan-tile-icon">🇨🇳</div><div class="plan-tile-name">China Online Banking</div><div class="plan-tile-tag">CN</div></label>
+        <label class="plan-tile" id="tile-otc"><input type="checkbox" value="otc" onchange="togglePlan(this)"><div class="plan-tile-check">✓</div><div class="plan-tile-icon">🏪</div><div class="plan-tile-name">Fiuu Cash (OTC)</div><div class="plan-tile-tag">MY</div></label>
+        <label class="plan-tile" id="tile-bnpl-online"><input type="checkbox" value="bnpl-online" onchange="togglePlan(this)"><div class="plan-tile-check">✓</div><div class="plan-tile-icon">🔖</div><div class="plan-tile-name">BNPL Online</div><div class="plan-tile-tag">SG</div></label>
+        <label class="plan-tile" id="tile-bnpl-offline"><input type="checkbox" value="bnpl-offline" onchange="togglePlan(this)"><div class="plan-tile-check">✓</div><div class="plan-tile-icon">🏷️</div><div class="plan-tile-name">BNPL Offline</div><div class="plan-tile-tag">SG</div></label>
+      </div>
+    </div>
+  </div>
+
+  <div id="sections"></div>
+
+  <button class="btn-gen" onclick="generateExcel()">⬇ Generate Excel for Upload</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const PLANS = {
+  'ewallet-online':{title:'eWallet Online',icon:'📱',displayName:'EWALLET ONLINE',planType:'Online',sheet:'eWallet Online',channels:[
+    {key:'MB2U_QRPay-Push',label:'MB2U QRPay Push',c:'MY'},
+    {key:'RPP_DuitNowQR',label:'RPP DuitNow QR',c:'MY'},
+    {key:'RPP_DuitNowQR@SUB@DOMESTIC_CACC',label:'↳ Domestic CACC',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR@SUB@DOMESTIC_SVGS',label:'↳ Domestic SVGS',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR@SUB@DOMESTIC_CCRD',label:'↳ Domestic CCRD',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR@SUB@DOMESTIC_WALL',label:'↳ Domestic WALL',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR@SUB@CROSSBORDER_CACC',label:'↳ Crossborder CACC',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR@SUB@CROSSBORDER_WALL',label:'↳ Crossborder WALL',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR@SUB@CROSSBORDER_CCRD',label:'↳ Crossborder CCRD',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR@SUB@CROSSBORDER_SVGS',label:'↳ Crossborder SVGS',c:'MY',sub:true},
+    {key:'TNG-EWALLET',label:'TNG eWallet',c:'MY'},
+    {key:'GrabPay',label:'GrabPay',c:'SG'},
+    {key:'ShopeePay',label:'ShopeePay',c:'SG'},
+    {key:'AlipayPlus',label:'AlipayPlus',c:'CN'},
+    {key:'AlipayPlus@SUB@ALIPAY',label:'↳ Alipay',c:'CN',sub:true},
+    {key:'AlipayPlus@SUB@GCASH',label:'↳ GCash',c:'CN',sub:true},
+    {key:'AlipayPlus@SUB@KAKAOPAY',label:'↳ KakaoPay',c:'CN',sub:true},
+    {key:'AlipayPlus@SUB@RABBITLINEPAY',label:'↳ RabbitLinePay',c:'CN',sub:true},
+    {key:'AlipayPlus@SUB@TRUEMONEYWALLET',label:'↳ TrueMoneyWallet',c:'CN',sub:true},
+    {key:'WeChatPay',label:'WeChatPay',c:'CN'}
+  ]},
+  'ewallet-offline':{title:'eWallet Offline',icon:'📲',displayName:'EWALLET OFFLINE',planType:'Offline',sheet:'eWallet Offline',channels:[
+    {key:'BOOST-OFFLINE',label:'BOOST Offline',c:'MY'},
+    {key:'MB2U_QRPay-Pull',label:'MB2U QRPay Pull',c:'MY'},
+    {key:'RPP_DuitNowQR-Offline_MP',label:'DuitNow Offline MP',c:'MY'},
+    {key:'RPP_DuitNowQR-Offline_MP@SUB@DOMESTIC_CACC',label:'↳ Domestic CACC',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR-Offline_MP@SUB@DOMESTIC_SVGS',label:'↳ Domestic SVGS',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR-Offline_MP@SUB@DOMESTIC_CCRD',label:'↳ Domestic CCRD',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR-Offline_MP@SUB@DOMESTIC_WALL',label:'↳ Domestic WALL',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR-Offline_MP@SUB@CROSSBORDER_CACC',label:'↳ Crossborder CACC',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR-Offline_MP@SUB@CROSSBORDER_WALL',label:'↳ Crossborder WALL',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR-Offline_MP@SUB@CROSSBORDER_CCRD',label:'↳ Crossborder CCRD',c:'MY',sub:true},
+    {key:'RPP_DuitNowQR-Offline_MP@SUB@CROSSBORDER_SVGS',label:'↳ Crossborder SVGS',c:'MY',sub:true},
+    {key:'TNG-EWALLET-Offline',label:'TNG eWallet Offline',c:'MY'},
+    {key:'TNG-EWALLET-Offline-MP',label:'TNG eWallet Offline MP',c:'MY'},
+    {key:'GrabPay-Offline',label:'GrabPay Offline',c:'SG'},
+    {key:'ShopeePay-Offline',label:'ShopeePay Offline',c:'SG'},
+    {key:'AlipayPlus-Offline',label:'AlipayPlus Offline',c:'CN'},
+    {key:'AlipayPlus-Offline@SUB@ALIPAY',label:'↳ Alipay',c:'CN',sub:true},
+    {key:'AlipayPlus-Offline@SUB@GCASH',label:'↳ GCash',c:'CN',sub:true},
+    {key:'AlipayPlus-Offline@SUB@KAKAOPAY',label:'↳ KakaoPay',c:'CN',sub:true},
+    {key:'AlipayPlus-Offline@SUB@RABBITLINEPAY',label:'↳ RabbitLinePay',c:'CN',sub:true},
+    {key:'AlipayPlus-Offline@SUB@TRUEMONEYWALLET',label:'↳ TrueMoneyWallet',c:'CN',sub:true},
+    {key:'UnionPay-Offline',label:'UnionPay Offline',c:'CN'},
+    {key:'WeChatPay-Offline',label:'WeChatPay Offline',c:'CN'}
+  ]},
+  'cc-online':{title:'Credit Card Online',icon:'💳',displayName:'Credit Card Online',planType:'Online',sheet:'CC Online',channels:[
+    {key:'CIL_UnionPay',label:'CIL UnionPay',c:'CN'},
+    {key:'CIL_Mastercard',label:'CIL Mastercard',c:'US'},
+    {key:'CIL_Mastercard@SUB@DOMESTIC_DEBIT',label:'↳ Domestic Debit',c:'US',sub:true},
+    {key:'CIL_Mastercard@SUB@DOMESTIC_CREDIT',label:'↳ Domestic Credit',c:'US',sub:true},
+    {key:'CIL_Mastercard@SUB@FOREIGN_DEBIT',label:'↳ Foreign Debit',c:'US',sub:true},
+    {key:'CIL_Mastercard@SUB@FOREIGN_CREDIT',label:'↳ Foreign Credit',c:'US',sub:true},
+    {key:'CIL_Mastercard@SUB@DOMESTIC_PREPAID',label:'↳ Domestic Prepaid',c:'US',sub:true},
+    {key:'CIL_Mastercard@SUB@FOREIGN_PREPAID',label:'↳ Foreign Prepaid',c:'US',sub:true},
+    {key:'CIL_Visa',label:'CIL Visa',c:'US'},
+    {key:'CIL_Visa@SUB@DOMESTIC_DEBIT',label:'↳ Domestic Debit',c:'US',sub:true},
+    {key:'CIL_Visa@SUB@DOMESTIC_CREDIT',label:'↳ Domestic Credit',c:'US',sub:true},
+    {key:'CIL_Visa@SUB@FOREIGN_DEBIT',label:'↳ Foreign Debit',c:'US',sub:true},
+    {key:'CIL_Visa@SUB@FOREIGN_CREDIT',label:'↳ Foreign Credit',c:'US',sub:true},
+    {key:'CIL_Visa@SUB@DOMESTIC_PREPAID',label:'↳ Domestic Prepaid',c:'US',sub:true},
+    {key:'CIL_Visa@SUB@FOREIGN_PREPAID',label:'↳ Foreign Prepaid',c:'US',sub:true},
+    {key:'CIL_Diners',label:'CIL Diners',c:'US'}
+  ]},
+  'cc-offline':{title:'Credit Card Offline',icon:'🏧',displayName:'Credit Card Offline',planType:'Offline',sheet:'CC Offline',channels:[
+    {key:'MYDEBIT_CP',label:'MyDebit CP',c:'MY'},
+    {key:'CIL_UPI_CP',label:'CIL UPI CP',c:'CN'},
+    {key:'CIL_Diners_CP',label:'CIL Diners CP',c:'US'},
+    {key:'CIL_Master_CP',label:'CIL Master CP',c:'US'},
+    {key:'CIL_Master_CP@SUB@DOMESTIC_DEBIT',label:'↳ Domestic Debit',c:'US',sub:true},
+    {key:'CIL_Master_CP@SUB@DOMESTIC_CREDIT',label:'↳ Domestic Credit',c:'US',sub:true},
+    {key:'CIL_Master_CP@SUB@FOREIGN_DEBIT',label:'↳ Foreign Debit',c:'US',sub:true},
+    {key:'CIL_Master_CP@SUB@FOREIGN_CREDIT',label:'↳ Foreign Credit',c:'US',sub:true},
+    {key:'CIL_Master_CP@SUB@DOMESTIC_PREPAID',label:'↳ Domestic Prepaid',c:'US',sub:true},
+    {key:'CIL_Master_CP@SUB@FOREIGN_PREPAID',label:'↳ Foreign Prepaid',c:'US',sub:true},
+    {key:'CIL_Visa_CP',label:'CIL Visa CP',c:'US'},
+    {key:'CIL_Visa_CP@SUB@DOMESTIC_DEBIT',label:'↳ Domestic Debit',c:'US',sub:true},
+    {key:'CIL_Visa_CP@SUB@DOMESTIC_CREDIT',label:'↳ Domestic Credit',c:'US',sub:true},
+    {key:'CIL_Visa_CP@SUB@FOREIGN_DEBIT',label:'↳ Foreign Debit',c:'US',sub:true},
+    {key:'CIL_Visa_CP@SUB@FOREIGN_CREDIT',label:'↳ Foreign Credit',c:'US',sub:true},
+    {key:'CIL_Visa_CP@SUB@DOMESTIC_PREPAID',label:'↳ Domestic Prepaid',c:'US',sub:true},
+    {key:'CIL_Visa_CP@SUB@FOREIGN_PREPAID',label:'↳ Foreign Prepaid',c:'US',sub:true}
+  ]},
+  'ib':{title:'Online Banking (MY)',icon:'🏦',displayName:'Online Banking',planType:'Online',sheet:'IB',channels:[
+    {key:'FPX_B2B',label:'FPX B2B',c:'MY'},
+    {key:'FPX-TPA',label:'FPX TPA',c:'MY'}
+  ]},
+  'cn-ib':{title:'China Online Banking',icon:'🇨🇳',displayName:'China Online Banking',planType:'Online',sheet:'IB',channels:[
+    {key:'GUPOP',label:'GUPOP',c:'CN'}
+  ]},
+  'otc':{title:'Fiuu Cash (OTC)',icon:'🏪',displayName:'Fiuu Cash',planType:'Online',sheet:'OTC',channels:[
+    {key:'Cash-711',label:'Cash @ 7-Eleven',c:'MY'}
+  ]},
+  'bnpl-online':{title:'BNPL Online',icon:'🔖',displayName:'BNPL - Buy Now Pay Later',planType:'Online',sheet:'BNPL',channels:[
+    {key:'Atome',label:'Atome',c:'SG'}
+  ]},
+  'bnpl-offline':{title:'BNPL Offline',icon:'🏷️',displayName:'BNPL - Buy Now Pay Later Offline',planType:'Offline',sheet:'BNPL',channels:[
+    {key:'Atome-Offline',label:'Atome Offline',c:'SG'}
+  ]}
+};
+
+const FLAGS={MY:'🇲🇾',SG:'🇸🇬',CN:'🇨🇳',US:'🇺🇸'};
+
+function togglePlan(cb){
+  cb.closest('.plan-tile').classList.toggle('active',cb.checked);
+  renderSections();
+}
+
+function renderSections(){
+  const container=document.getElementById('sections');
+  const active=[...document.querySelectorAll('.plan-tile input:checked')].map(cb=>cb.value);
+  if(!active.length){container.innerHTML='';return;}
+
+  container.innerHTML=active.map(pid=>{
+    const cfg=PLANS[pid];
+    const rows=cfg.channels.map(ch=>`
+      <div class="ch-row ${ch.sub?'sub':''}">
+        <span class="ch-flag">${FLAGS[ch.c]}</span>
+        <span class="ch-name">${ch.label}<span class="ctag tag-${ch.c.toLowerCase()}">${ch.c}</span></span>
+        <div class="ch-rate"><input type="text" id="r_${pid}_${ch.key}" placeholder="rate %" inputmode="decimal"/></div>
+        <div class="ch-cost"><input type="text" id="c_${pid}_${ch.key}" placeholder="cost RM" inputmode="decimal"/></div>
+      </div>`).join('');
+    return `<div class="card plan-section visible">
+      <div class="plan-section-header"><span>${cfg.icon}</span><span class="plan-section-header-title">${cfg.title}</span></div>
+      <div class="channels-table">
+        <div class="ch-header"><div></div><div>Channel</div><div>Min Rate %</div><div>Min Cost RM</div></div>
+        ${rows}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function generateExcel(){
+  const mid=document.getElementById('merchantId').value.trim();
+  if(!mid){alert('Please enter a Merchant ID.');return;}
+  const active=[...document.querySelectorAll('.plan-tile input:checked')].map(cb=>cb.value);
+  if(!active.length){alert('Please select at least one plan type.');return;}
+
+  const wb=XLSX.utils.book_new();
+
+  // Plans sheet
+  const plansData=[
+    ['PLAN INFO','','',''],
+    ['plan_type\n(Online/Offline/Both)','display_name','plan_name','sales_pic'],
+    ['Plan Type','Display Name','Plan Name (unique)','Sales Pic'],
+    ['📌  Add one row per plan. Link plan_name across sheets.','','','']
+  ];
+  const remarks=(document.getElementById('remarks')||{}).value||'';
+  if(remarks){plansData.push(['📝 Remarks: '+remarks,'','','']);}
+  active.forEach(pid=>{
+    const cfg=PLANS[pid];
+    plansData.push([cfg.planType,cfg.displayName,`${cfg.displayName} (${mid})`,mid]);
+  });
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(plansData),'Plans');
+
+  // Channel sheets
+  const sheetMap={};
+  active.forEach(pid=>{
+    const s=PLANS[pid].sheet;
+    if(!sheetMap[s])sheetMap[s]=[];
+    sheetMap[s].push(pid);
+  });
+
+  ['eWallet Online','eWallet Offline','CC Online','CC Offline','IB','OTC','BNPL'].forEach(sName=>{
+    if(!sheetMap[sName])return;
+    const pids=sheetMap[sName];
+    const firstCfg=PLANS[pids[0]];
+    const channels=firstCfg.channels;
+
+    const rows=[
+      ['plan_name',...channels.map(ch=>FLAGS[ch.c]+' '+ch.c)],
+      ['plan_name',...channels.map(ch=>ch.key)],
+      ['',...channels.map(ch=>ch.label)],
+      ['📌  Rate=Min Rate %, Cost=Min Cost RM. Formula: Default=Min+1, Max=Min+3. Blank=not included.',...channels.map(()=>'')] 
+    ];
+
+    pids.forEach(pid=>{
+      const cfg=PLANS[pid];
+      const row=[`${cfg.displayName} (${mid})`];
+      cfg.channels.forEach(ch=>{
+        const r=(document.getElementById(`r_${pid}_${ch.key}`)||{}).value||'';
+        const c=(document.getElementById(`c_${pid}_${ch.key}`)||{}).value||'';
+        if(!r&&!c){row.push('');}
+        else if(!c||c==='0'){row.push(r===''?'':parseFloat(r));}
+        else{row.push(`${r===''?'0':r}, cost=${c}`);}
+      });
+      rows.push(row);
+    });
+
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),sName);
+  });
+
+  const fn=`fiuu_plans_${mid}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb,fn);
+  const t=document.getElementById('toast');
+  t.textContent=`✅ ${fn} downloaded!`;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
