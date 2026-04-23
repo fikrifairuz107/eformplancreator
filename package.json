@@ -1,0 +1,12 @@
+{
+  "name": "fiuu-plan-form",
+  "version": "1.0.0",
+  "description": "Fiuu Eform Plan Request Form",
+  "main": "form_server.js",
+  "scripts": {
+    "start": "node form_server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
